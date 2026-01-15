@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- 
+        Basic document metadata
+        - UTF-8 charset for full Unicode support
+        - Responsive viewport for mobile devices
+    -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Page title shown in browser tab -->
+    <title>WhoDisIP | ModGecko Intelligence</title>
+    
+    <!-- 
+        Google Fonts:
+        - Nunito for UI / general text
+        - JetBrains Mono for technical / data output
+    -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=JetBrains+Mono&display=swap" rel="stylesheet">
+
+    <!-- Feather Icons (lightweight SVG icon set) -->
+    <script src="https://unpkg.com/feather-icons"></script>
+
+    <style>
+        /*
+            CSS Variables
+            Centralized color palette for easy theming
+        */
+        :root {
+            --deep-navy: #0f172a;
+            --primary-blue: #7b82f3;
+            --accent-cyan: #06b6d4; 
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --input-bg: #f1f5f9;
+        }
+
+        /*
+            Dark theme overrides
+            Activated via data-theme="dark" on <body>
+        */
+        [data-theme="dark"] {
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: rgba(255,255,255,0.1);
+            --input-bg: rgba(0,0,0,0.2);
+        }
+
+        /*
+            Global body styling
+            Centers the main module vertically and horizontally
+        */
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            font-family: 'Nunito', sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column; 
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            transition: background-color 0.3s ease;
+        }
+
+        /*
+            Main container card
+            Holds visual accent + functional content
+        */
+        .module-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            display: flex;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        /*
+            Left-side visual accent panel
+            Used purely for branding / aesthetics
+        */
+        .visual-accent {
+            flex: 0.8;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* ModGecko mascot image */
+        .mg-mascot {
+            width: 100%;
+            max-width: 220px;
+            height: auto;
+            display: block;
+        }
+
+        /* Right-side functional content */
+        .content {
+            flex: 2;
+            padding: 40px;
+            position: relative;
+        }
+
+        /*
+            Theme toggle button
+            Switches between light/dark themes
+        */
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Small license / category tag */
+        .license-tag {
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: var(--primary-blue);
+            background: rgba(123, 130, 243, 0.1);
+            padding: 4px 12px;
+            border-radius: 50px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+
+        /*
+            Input + button wrapper
+            Keeps them aligned and responsive
+        */
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            width: 100%;
+        }
+
+        /* Target input field (IP or domain) */
+        input {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--input-bg);
+            color: var(--text-main);
+            font-size: 1rem;
+            outline: none;
+            min-width: 0; 
+        }
+
+        /*
+            Primary action button
+            Slight press animation for feedback
+        */
+        .btn-primary {
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 0 25px;
+            border-radius: 10px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #5b62d6;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .btn-primary:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #5b62d6;
+        }
+
+        /*
+            Results grid
+            Hidden until data is available
+        */
+        #results {
+            display: none;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        /* Individual result cards */
+        .data-card {
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .label {
+            font-size: 0.65rem;
+            font-weight: 900;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .value {
+            font-weight: 700;
+            color: var(--text-main);
+            font-size: 0.9rem;
+            word-break: break-all;
+        }
+
+        /* Nameserver stack formatting */
+        .ns-stack {
+            display: block;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            color: var(--primary-blue);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+        }
+
+        /*
+            Footer below the module
+            External branding and credits
+        */
+        .external-footer {
+            margin-top: 25px;
+            text-align: center;
+            width: 100%;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        /* Animated heart icon */
+        .external-footer .heart {
+            color: #f43f5e;
+            display: inline-block;
+            animation: heartBeat 1.5s infinite;
+            margin: 0 2px;
+        }
+
+        .external-footer a {
+            color: var(--primary-blue);
+            text-decoration: none;
+            font-weight: 800;
+        }
+
+        @keyframes heartBeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        /* Mobile adjustments */
+        @media (max-width: 768px) {
+            .module-card { flex-direction: column; }
+            .mg-mascot { max-width: 150px; }
+        }
+    </style>
+</head>
+
+<body data-theme="dark">
+<!-- Dark theme enabled by default -->
+
+<div class="module-card">
+    <!-- Visual branding column -->
+    <div class="visual-accent">
+        <img src="https://modgecko.com/images/mascot.svg" alt="ModGecko Mascot" class="mg-mascot">
+    </div>
+
+    <!-- Main interactive content -->
+    <div class="content">
+        <!-- Theme toggle button -->
+        <button class="theme-toggle" onclick="toggleTheme()" title="Switch Theme">
+            <i data-feather="sun" id="theme-icon"></i>
+        </button>
+
+        <span class="license-tag">Open Source Intelligence</span>
+        <h2>WhoDisIP</h2>
+
+        <!-- Short description -->
+        <p style="color: var(--text-muted); margin-bottom: 25px;">
+            Mapping network infrastructure with IPv4 & IPv6 support.
+        </p>
+
+        <!-- Target input -->
+        <div class="input-group">
+            <input type="text" id="target" placeholder="(e.g., 8.8.8.8 or modgecko.com)">
+            <button class="btn-primary" onclick="runIntel()">Analyze</button>
+        </div>
+
+        <!-- Results container -->
+        <div id="results">
+            <!-- Resolved IP -->
+            <div class="data-card" style="grid-column: 1 / -1; border-left: 4px solid var(--accent-cyan);">
+                <span class="label">Resolved Target IP</span>
+                <div class="value" id="res-ip" style="font-size: 1.1rem; color: var(--accent-cyan); font-family: 'JetBrains Mono';"></div>
+            </div>
+
+            <!-- Nameservers (domain targets only) -->
+            <div class="data-card" id="ns-card" style="display:none; grid-column: 1 / -1;">
+                <span class="label">Nameservers</span>
+                <div class="value ns-stack" id="res-ns"></div>
+            </div>
+
+            <div class="data-card"><span class="label">Hosting Provider</span><div class="value" id="res-isp"></div></div>
+            <div class="data-card"><span class="label">Domain Registrar</span><div class="value" id="res-registrar">Querying...</div></div>
+            <div class="data-card"><span class="label">Hosting Location</span><div class="value" id="res-loc"></div></div>
+            <div class="data-card"><span class="label">Timezone</span><div class="value" id="res-tz"></div></div>
+        </div>
+    </div>
+</div>
+
+<!-- External footer / credits -->
+<div class="external-footer">
+    Developed with <span class="heart">❤️</span> by 
+    <a href="https://modgecko.com" target="_blank">ModGecko.com</a>
+    <a href="https://github.com/Pyryxe" target="_blank" style="display:block; font-size:0.75rem; margin-top:8px;">
+        Source code available on GitHub
+    </a>
+</div>
+
+<script>
+    // Initialize Feather icons
+    feather.replace();
+
+    /*
+        Toggle between light and dark themes
+        Updates both data-theme and icon
+    */
+    function toggleTheme() {
+        const body = document.body;
+        const icon = document.getElementById('theme-icon');
+        const isDark = body.getAttribute('data-theme') === 'dark';
+
+        body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+        icon.setAttribute('data-feather', isDark ? 'moon' : 'sun');
+        feather.replace();
+    }
+
+    /*
+        Main intelligence lookup
+        Handles both IP and domain targets
+    */
+    async function runIntel() {
+        const input = document.getElementById('target').value.trim();
+        if(!input) return;
+
+        const regField = document.getElementById('res-registrar');
+        regField.innerText = "Scanning Registry...";
+
+        try {
+            let ip = input;
+
+            // Detect IPv4 or IPv6 input
+            const isIP =
+                /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(input) ||
+                /([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}/.test(input);
+
+            if(!isIP) {
+                /*
+                    Domain resolution logic:
+                    - Prefer IPv6 (AAAA)
+                    - Fallback to IPv4 (A)
+                */
+
+                const dns6Res = await fetch(`https://dns.google/resolve?name=${input}&type=AAAA`);
+                const dns6Data = await dns6Res.json();
+
+                if(dns6Data.Answer && dns6Data.Answer.length > 0) {
+                    ip = dns6Data.Answer[0].data;
+                } else {
+                    const dns4Res = await fetch(`https://dns.google/resolve?name=${input}&type=A`);
+                    const dns4Data = await dns4Res.json();
+                    if(!dns4Data.Answer) throw new Error("DNS resolution failed.");
+                    ip = dns4Data.Answer[0].data;
+                }
+
+                // Nameserver lookup
+                const dnsNSRes = await fetch(`https://dns.google/resolve?name=${input}&type=NS`);
+                const dnsNSData = await dnsNSRes.json();
+                if(dnsNSData.Answer) {
+                    document.getElementById('res-ns').innerText =
+                        dnsNSData.Answer.map(ans => ans.data).join('\n');
+                    document.getElementById('ns-card').style.display = 'block';
+                }
+
+                // Registrar lookup via RDAP
+                try {
+                    const rdapRes = await fetch(`https://rdap.org/domain/${input}`);
+                    if (!rdapRes.ok) throw new Error();
+                    const rdapData = await rdapRes.json();
+                    const registrar = rdapData.entities.find(e => e.roles.includes('registrar'));
+                    regField.innerText = registrar
+                        ? registrar.vcardArray[1][1][3]
+                        : "Registry Restricted";
+                } catch(e) { 
+                    regField.innerHTML =
+                        `<span style="opacity:0.6; font-size:0.8rem;">Restricted/Manual</span>`;
+                }
+            } else {
+                // IP targets do not have registrar or nameservers
+                regField.innerText = "N/A (IP Target)";
+                document.getElementById('ns-card').style.display = 'none';
+            }
+
+            /*
+                Infrastructure geolocation lookup
+                Uses ipwho.is for ISP, location, and timezone
+            */
+            const geoRes = await fetch(`https://ipwho.is/${ip}`);
+            const data = await geoRes.json();
+
+            if(data.success) {
+                document.getElementById('res-ip').innerText = data.ip;
+                document.getElementById('res-isp').innerText = data.connection.isp;
+                document.getElementById('res-loc').innerText = `${data.city}, ${data.country}`;
+                document.getElementById('res-tz').innerText = data.timezone.id;
+                document.getElementById('results').style.display = 'grid';
+            }
+        } catch (e) {
+            alert(e.message);
+        }
+    }
+</script>
+</body>
+</html>
