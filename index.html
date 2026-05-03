@@ -1,446 +1,287 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- 
-        Basic document metadata
-        - UTF-8 charset for full Unicode support
-        - Responsive viewport for mobile devices
-    -->
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WhoDisIP | Open Source Network Intelligence</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=JetBrains+Mono&display=swap" rel="stylesheet">
 
-    <!-- Page title shown in browser tab -->
-    <title>WhoDisIP | ModGecko Intelligence</title>
-    
-    <!-- 
-        Google Fonts:
-        - Nunito for UI / general text
-        - JetBrains Mono for technical / data output
-    -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=JetBrains+Mono&display=swap" rel="stylesheet">
+  <!-- Load Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Feather Icons (lightweight SVG icon set) -->
-    <script src="https://unpkg.com/feather-icons"></script>
-
-    <style>
-        /*
-            CSS Variables
-            Centralized color palette for easy theming
-        */
-        :root {
-            --deep-navy: #0f172a;
-            --primary-blue: #7b82f3;
-            --accent-cyan: #06b6d4; 
-            --bg-body: #f8fafc;
-            --bg-card: #ffffff;
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --border: #e2e8f0;
-            --input-bg: #f1f5f9;
-        }
-
-        /*
-            Dark theme overrides
-            Activated via data-theme="dark" on <body>
-        */
-        [data-theme="dark"] {
-            --bg-body: #0f172a;
-            --bg-card: #1e293b;
-            --text-main: #f1f5f9;
-            --text-muted: #94a3b8;
-            --border: rgba(255,255,255,0.1);
-            --input-bg: rgba(0,0,0,0.2);
-        }
-
-        /*
-            Global body styling
-            Centers the main module vertically and horizontally
-        */
-        body {
-            background-color: var(--bg-body);
-            color: var(--text-main);
-            font-family: 'Nunito', sans-serif;
-            margin: 0;
-            padding: 40px 20px;
-            display: flex;
-            flex-direction: column; 
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            transition: background-color 0.3s ease;
-        }
-
-        /*
-            Main container card
-            Holds visual accent + functional content
-        */
-        .module-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            display: flex;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            overflow: hidden;
-            max-width: 1000px;
-            width: 100%;
-        }
-
-        /*
-            Left-side visual accent panel
-            Used purely for branding / aesthetics
-        */
-        .visual-accent {
-            flex: 0.8;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            padding: 40px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-
-        /* ModGecko mascot image */
-        .mg-mascot {
-            width: 100%;
-            max-width: 220px;
-            height: auto;
-            display: block;
-        }
-
-        /* Right-side functional content */
-        .content {
-            flex: 2;
-            padding: 40px;
-            position: relative;
-        }
-
-        /*
-            Theme toggle button
-            Switches between light/dark themes
-        */
-        .theme-toggle {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: var(--input-bg);
-            border: 1px solid var(--border);
-            color: var(--text-main);
-            padding: 8px;
-            border-radius: 8px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-        }
-
-        /* Small license / category tag */
-        .license-tag {
-            font-size: 0.7rem;
-            font-weight: 800;
-            color: var(--primary-blue);
-            background: rgba(123, 130, 243, 0.1);
-            padding: 4px 12px;
-            border-radius: 50px;
-            text-transform: uppercase;
-            margin-bottom: 10px;
-            display: inline-block;
-        }
-
-        /*
-            Input + button wrapper
-            Keeps them aligned and responsive
-        */
-        .input-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 25px;
-            width: 100%;
-        }
-
-        /* Target input field (IP or domain) */
-        input {
-            flex: 1;
-            padding: 15px;
-            border: 2px solid var(--border);
-            border-radius: 10px;
-            font-family: 'JetBrains Mono', monospace;
-            background: var(--input-bg);
-            color: var(--text-main);
-            font-size: 1rem;
-            outline: none;
-            min-width: 0; 
-        }
-
-        /*
-            Primary action button
-            Slight press animation for feedback
-        */
-        .btn-primary {
-            background: var(--primary-blue);
-            color: white;
-            border: none;
-            padding: 0 25px;
-            border-radius: 10px;
-            font-weight: 800;
-            cursor: pointer;
-            box-shadow: 0 4px 0 #5b62d6;
-            text-transform: uppercase;
-            white-space: nowrap;
-        }
-
-        .btn-primary:active {
-            transform: translateY(2px);
-            box-shadow: 0 2px 0 #5b62d6;
-        }
-
-        /*
-            Results grid
-            Hidden until data is available
-        */
-        #results {
-            display: none;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        /* Individual result cards */
-        .data-card {
-            background: var(--input-bg);
-            border: 1px solid var(--border);
-            padding: 15px;
-            border-radius: 10px;
-        }
-
-        .label {
-            font-size: 0.65rem;
-            font-weight: 900;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        .value {
-            font-weight: 700;
-            color: var(--text-main);
-            font-size: 0.9rem;
-            word-break: break-all;
-        }
-
-        /* Nameserver stack formatting */
-        .ns-stack {
-            display: block;
-            line-height: 1.6;
-            white-space: pre-wrap;
-            color: var(--primary-blue);
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.85rem;
-        }
-
-        /*
-            Footer below the module
-            External branding and credits
-        */
-        .external-footer {
-            margin-top: 25px;
-            text-align: center;
-            width: 100%;
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            font-weight: 600;
-        }
-
-        /* Animated heart icon */
-        .external-footer .heart {
-            color: #f43f5e;
-            display: inline-block;
-            animation: heartBeat 1.5s infinite;
-            margin: 0 2px;
-        }
-
-        .external-footer a {
-            color: var(--primary-blue);
-            text-decoration: none;
-            font-weight: 800;
-        }
-
-        @keyframes heartBeat {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.15); }
-        }
-
-        /* Mobile adjustments */
-        @media (max-width: 768px) {
-            .module-card { flex-direction: column; }
-            .mg-mascot { max-width: 150px; }
-        }
-    </style>
-</head>
-
-<body data-theme="dark">
-<!-- Dark theme enabled by default -->
-
-<div class="module-card">
-    <!-- Visual branding column -->
-    <div class="visual-accent">
-        <img src="https://modgecko.com/images/mascot.svg" alt="ModGecko Mascot" class="mg-mascot">
-    </div>
-
-    <!-- Main interactive content -->
-    <div class="content">
-        <!-- Theme toggle button -->
-        <button class="theme-toggle" onclick="toggleTheme()" title="Switch Theme">
-            <i data-feather="sun" id="theme-icon"></i>
-        </button>
-
-        <span class="license-tag">Open Source Intelligence</span>
-        <h2>WhoDisIP</h2>
-
-        <!-- Short description -->
-        <p style="color: var(--text-muted); margin-bottom: 25px;">
-            Mapping network infrastructure with IPv4 & IPv6 support.
-        </p>
-
-        <!-- Target input -->
-        <div class="input-group">
-            <input type="text" id="target" placeholder="(e.g., 8.8.8.8 or modgecko.com)">
-            <button class="btn-primary" onclick="runIntel()">Analyze</button>
-        </div>
-
-        <!-- Results container -->
-        <div id="results">
-            <!-- Resolved IP -->
-            <div class="data-card" style="grid-column: 1 / -1; border-left: 4px solid var(--accent-cyan);">
-                <span class="label">Resolved Target IP</span>
-                <div class="value" id="res-ip" style="font-size: 1.1rem; color: var(--accent-cyan); font-family: 'JetBrains Mono';"></div>
-            </div>
-
-            <!-- Nameservers (domain targets only) -->
-            <div class="data-card" id="ns-card" style="display:none; grid-column: 1 / -1;">
-                <span class="label">Nameservers</span>
-                <div class="value ns-stack" id="res-ns"></div>
-            </div>
-
-            <div class="data-card"><span class="label">Hosting Provider</span><div class="value" id="res-isp"></div></div>
-            <div class="data-card"><span class="label">Domain Registrar</span><div class="value" id="res-registrar">Querying...</div></div>
-            <div class="data-card"><span class="label">Hosting Location</span><div class="value" id="res-loc"></div></div>
-            <div class="data-card"><span class="label">Timezone</span><div class="value" id="res-tz"></div></div>
-        </div>
-    </div>
-</div>
-
-<!-- External footer / credits -->
-<div class="external-footer">
-    Developed with <span class="heart">❤️</span> by 
-    <a href="https://modgecko.com" target="_blank">ModGecko.com</a>
-    <a href="https://github.com/Pyryxe" target="_blank" style="display:block; font-size:0.75rem; margin-top:8px;">
-        Source code available on GitHub
-    </a>
-</div>
-
-<script>
-    // Initialize Feather icons
-    feather.replace();
-
-    /*
-        Toggle between light and dark themes
-        Updates both data-theme and icon
-    */
-    function toggleTheme() {
-        const body = document.body;
-        const icon = document.getElementById('theme-icon');
-        const isDark = body.getAttribute('data-theme') === 'dark';
-
-        body.setAttribute('data-theme', isDark ? 'light' : 'dark');
-        icon.setAttribute('data-feather', isDark ? 'moon' : 'sun');
-        feather.replace();
+  <style>
+    body {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
+  </style>
+</head>
+<body class="min-h-screen bg-[#0b0f19] font-sans selection:bg-[#ffd06f]/30 text-slate-300 flex flex-col">
 
+  <!-- Main Page Content -->
+  <div id="app" class="flex-grow">
+    <!-- Hero Section -->
+    <header class="bg-[#0b0f19] pt-20 pb-36 border-b border-slate-800 relative overflow-hidden">
+      <!-- Brutalist tech grid -->
+      <div class="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:3rem_3rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-30"></div>
+      
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+        <h1 class="text-4xl md:text-6xl font-extrabold text-white tracking-tight mb-6 leading-[1.1]">
+          WhoDis<span class="text-[#ffd06f]">IP</span>
+        </h1>
+        <p class="text-xl text-slate-400 leading-relaxed font-medium mb-10 max-w-2xl mx-auto">
+          Mapping network infrastructure with IPv4 & IPv6 support.
+        </p>
+      </div>
+    </header>
+
+    <!-- Main Content Layout -->
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 -mt-24 relative z-20">
+      
+      <!-- Module Card -->
+      <div class="bg-slate-900 rounded-3xl shadow-2xl border border-slate-800 overflow-hidden flex flex-col md:flex-row">
+        
+        <!-- Visual Accent Panel (Left) -->
+        <div class="bg-[#06080d] md:w-1/3 flex flex-col justify-center items-center p-8 border-b md:border-b-0 md:border-r border-slate-800 relative">
+          <!-- Detective Icon -->
+          <div class="mt-6 md:mt-0 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-32 h-32 text-[#ffd06f]">
+              <path d="M5.5 8A2.5 2.5 0 0 1 8 5.5h8A2.5 2.5 0 0 1 18.5 8v2h-13V8Z" />
+              <path d="M2 10h20" />
+              <circle cx="7" cy="15" r="3" />
+              <path d="M10 15h4" />
+              <circle cx="17" cy="15" r="3" />
+            </svg>
+          </div>
+        </div>
+
+        <!-- Functional Content (Right) -->
+        <div class="flex-1 p-8 md:p-10 relative">
+          <span class="text-xs font-extrabold text-[#ffd06f] bg-[#ffd06f]/10 px-3 py-1.5 rounded-full uppercase tracking-wider mb-6 inline-block border border-[#ffd06f]/20">Open Source Intelligence</span>
+          
+          <!-- Input Group -->
+          <div class="flex flex-col sm:flex-row gap-3 mb-8 w-full">
+            <input type="text" id="target" placeholder="(e.g., 8.8.8.8 or example.com)" onkeydown="if(event.key === 'Enter') runIntel()" class="flex-1 bg-[#0b0f19] border border-slate-700 text-white px-5 py-4 rounded-xl font-mono text-base focus:border-[#ffd06f] focus:ring-1 focus:ring-[#ffd06f] outline-none placeholder:text-slate-600">
+            <button type="button" onclick="runIntel()" class="bg-[#ffd06f] text-slate-900 px-8 py-4 rounded-xl font-extrabold uppercase tracking-wider hover:bg-[#e6bb63] transition-transform active:translate-y-1 shadow-lg shadow-[#ffd06f]/20 flex-shrink-0 flex items-center justify-center">
+              Analyze
+            </button>
+          </div>
+
+          <!-- Results Grid -->
+          <div id="results" class="grid grid-cols-1 sm:grid-cols-2 gap-4" style="display: none;">
+            
+            <!-- Resolved IP -->
+            <div class="col-span-1 sm:col-span-2 bg-slate-800/50 border border-slate-700 p-5 rounded-2xl border-l-4 border-l-[#ffd06f]">
+              <span class="text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-1 block">Resolved Target IP</span>
+              <div id="res-ip" class="text-[#ffd06f] font-mono text-xl font-bold break-all"></div>
+            </div>
+
+            <!-- Nameservers -->
+            <div id="ns-card" class="col-span-1 sm:col-span-2 bg-slate-800/50 border border-slate-700 p-5 rounded-2xl" style="display: none;">
+              <span class="text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-1 block">Nameservers</span>
+              <div id="res-ns" class="text-emerald-400 font-mono text-sm whitespace-pre-wrap leading-relaxed break-all"></div>
+            </div>
+
+            <!-- Provider -->
+            <div class="bg-slate-800/50 border border-slate-700 p-5 rounded-2xl">
+              <span class="text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-1 block">Hosting Provider</span>
+              <div id="res-isp" class="text-slate-200 font-bold text-base break-words"></div>
+            </div>
+
+            <!-- Registrar -->
+            <div class="bg-slate-800/50 border border-slate-700 p-5 rounded-2xl">
+              <span class="text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-1 block">Domain Registrar</span>
+              <div id="res-registrar" class="text-slate-200 font-bold text-base break-words"></div>
+            </div>
+
+            <!-- Location -->
+            <div class="bg-slate-800/50 border border-slate-700 p-5 rounded-2xl">
+              <span class="text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-1 block">Hosting Location</span>
+              <div id="res-loc" class="text-slate-200 font-bold text-base break-words"></div>
+            </div>
+
+            <!-- Timezone -->
+            <div class="bg-slate-800/50 border border-slate-700 p-5 rounded-2xl">
+              <span class="text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-1 block">Timezone</span>
+              <div id="res-tz" class="text-slate-200 font-bold text-base break-words"></div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Custom Standalone Footer -->
+  <footer class="bg-[#0b0f19] py-8 text-center border-t border-slate-800 mt-auto">
+    <div class="max-w-4xl mx-auto px-4">
+      <div class="flex justify-center items-center space-x-6 mb-6">
+        <a href="https://bsreviews.com" target="_blank" rel="noopener noreferrer" class="text-slate-400 hover:text-white font-bold transition-colors text-sm">
+          Visit BS Reviews
+        </a>
+        <span class="text-slate-700 font-bold">•</span>
+        <a href="https://github.com/Dextyix/WhoDisIP" target="_blank" rel="noopener noreferrer" class="text-slate-400 hover:text-white font-bold transition-colors text-sm flex items-center">
+          <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"></path>
+          </svg>
+          GitHub Repository
+        </a>
+      </div>
+      <p class="text-slate-500 font-bold text-sm">
+        &copy; 2026 BS Reviews. All rights reserved.
+      </p>
+      <p class="text-slate-600 text-xs font-bold mt-2">
+        Open source under the <a href="https://www.gnu.org/licenses/gpl-3.0.html" target="_blank" rel="noopener noreferrer" class="text-[#ffd06f] hover:underline">GNU General Public License</a>.
+      </p>
+    </div>
+  </footer>
+
+  <!-- Robust Rebuilt Scripts -->
+  <script>
     /*
         Main intelligence lookup
-        Handles both IP and domain targets
+        Fully rewritten to bypass CORS restrictions with a dual-provider failover
     */
     async function runIntel() {
         const input = document.getElementById('target').value.trim();
         if(!input) return;
 
-        const regField = document.getElementById('res-registrar');
-        regField.innerText = "Scanning Registry...";
+        // Grab all DOM nodes
+        const resultsDiv = document.getElementById('results');
+        const resIp = document.getElementById('res-ip');
+        const nsCard = document.getElementById('ns-card');
+        const resNs = document.getElementById('res-ns');
+        const resIsp = document.getElementById('res-isp');
+        const resReg = document.getElementById('res-registrar');
+        const resLoc = document.getElementById('res-loc');
+        const resTz = document.getElementById('res-tz');
+
+        // 1. Instantly show the grid and loading states so the user knows it's working
+        resultsDiv.style.display = 'grid';
+        nsCard.style.display = 'none';
+        resIp.innerText = "Resolving...";
+        resIsp.innerText = "Scanning...";
+        resReg.innerText = "Scanning...";
+        resLoc.innerText = "Scanning...";
+        resTz.innerText = "Scanning...";
 
         try {
             let ip = input;
 
-            // Detect IPv4 or IPv6 input
-            const isIP =
-                /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(input) ||
-                /([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}/.test(input);
+            // Simple IPv4 / IPv6 regex
+            const isIP = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(input) || /([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}/.test(input);
 
             if(!isIP) {
-                /*
-                    Domain resolution logic:
-                    - Prefer IPv6 (AAAA)
-                    - Fallback to IPv4 (A)
-                */
+                // 2. Resolve Domain to IP (Handle CNAMEs correctly)
+                try {
+                    const dns6Res = await fetch(`https://dns.google/resolve?name=${input}&type=AAAA`);
+                    const dns6Data = await dns6Res.json();
+                    const aaaaRecord = dns6Data.Answer && dns6Data.Answer.find(r => r.type === 28);
 
-                const dns6Res = await fetch(`https://dns.google/resolve?name=${input}&type=AAAA`);
-                const dns6Data = await dns6Res.json();
-
-                if(dns6Data.Answer && dns6Data.Answer.length > 0) {
-                    ip = dns6Data.Answer[0].data;
-                } else {
-                    const dns4Res = await fetch(`https://dns.google/resolve?name=${input}&type=A`);
-                    const dns4Data = await dns4Res.json();
-                    if(!dns4Data.Answer) throw new Error("DNS resolution failed.");
-                    ip = dns4Data.Answer[0].data;
+                    if(aaaaRecord) {
+                        ip = aaaaRecord.data;
+                    } else {
+                        const dns4Res = await fetch(`https://dns.google/resolve?name=${input}&type=A`);
+                        const dns4Data = await dns4Res.json();
+                        
+                        // Extract type 1 (A Record) specifically, ignoring CNAMEs
+                        const aRecord = dns4Data.Answer && dns4Data.Answer.find(r => r.type === 1);
+                        
+                        if(!aRecord) {
+                            throw new Error("DNS resolution failed. Domain may not exist.");
+                        }
+                        ip = aRecord.data;
+                    }
+                    resIp.innerText = ip;
+                } catch(e) {
+                    resIp.innerText = "Resolution Failed";
+                    throw e; // Stop execution if we can't even get an IP
                 }
 
-                // Nameserver lookup
-                const dnsNSRes = await fetch(`https://dns.google/resolve?name=${input}&type=NS`);
-                const dnsNSData = await dnsNSRes.json();
-                if(dnsNSData.Answer) {
-                    document.getElementById('res-ns').innerText =
-                        dnsNSData.Answer.map(ans => ans.data).join('\n');
-                    document.getElementById('ns-card').style.display = 'block';
+                // 3. Fetch Nameservers
+                try {
+                    const dnsNSRes = await fetch(`https://dns.google/resolve?name=${input}&type=NS`);
+                    const dnsNSData = await dnsNSRes.json();
+                    if(dnsNSData.Answer && dnsNSData.Answer.length > 0) {
+                        resNs.innerText = dnsNSData.Answer.map(ans => ans.data).join('\n');
+                        nsCard.style.display = 'block';
+                    }
+                } catch(e) {
+                    console.log("NS Lookup failed", e); // Silent fail is okay here
                 }
 
-                // Registrar lookup via RDAP
+                // 4. Registrar Lookup (RDAP)
                 try {
                     const rdapRes = await fetch(`https://rdap.org/domain/${input}`);
                     if (!rdapRes.ok) throw new Error();
                     const rdapData = await rdapRes.json();
-                    const registrar = rdapData.entities.find(e => e.roles.includes('registrar'));
-                    regField.innerText = registrar
+                    const registrar = rdapData.entities && rdapData.entities.find(e => e.roles && e.roles.includes('registrar'));
+                    
+                    resReg.innerText = registrar && registrar.vcardArray && registrar.vcardArray[1] && registrar.vcardArray[1][1]
                         ? registrar.vcardArray[1][1][3]
-                        : "Registry Restricted";
+                        : "Registry Restricted / Redacted";
                 } catch(e) { 
-                    regField.innerHTML =
-                        `<span style="opacity:0.6; font-size:0.8rem;">Restricted/Manual</span>`;
+                    resReg.innerHTML = `<span style="opacity:0.6; font-size:0.8rem;">Restricted / Manual Check Required</span>`;
                 }
             } else {
-                // IP targets do not have registrar or nameservers
-                regField.innerText = "N/A (IP Target)";
-                document.getElementById('ns-card').style.display = 'none';
+                // Input was already an IP
+                resIp.innerText = ip;
+                resReg.innerText = "N/A (Direct IP Target)";
             }
 
-            /*
-                Infrastructure geolocation lookup
-                Uses ipwho.is for ISP, location, and timezone
-            */
-            const geoRes = await fetch(`https://ipwho.is/${ip}`);
-            const data = await geoRes.json();
+            // 5. IP Geolocation & ISP (NEW DUAL-PROVIDER SYSTEM)
+            try {
+                let geoData = null;
 
-            if(data.success) {
-                document.getElementById('res-ip').innerText = data.ip;
-                document.getElementById('res-isp').innerText = data.connection.isp;
-                document.getElementById('res-loc').innerText = `${data.city}, ${data.country}`;
-                document.getElementById('res-tz').innerText = data.timezone.id;
-                document.getElementById('results').style.display = 'grid';
+                // Try Provider 1: ipapi.co (Great for ISP names, but has rate limits)
+                try {
+                    const primaryGeo = await fetch(`https://ipapi.co/${ip}/json/`);
+                    const pData = await primaryGeo.json();
+                    if (!pData.error && pData.org) {
+                        geoData = {
+                            isp: pData.org,
+                            loc: `${pData.city ? pData.city + ', ' : ''}${pData.country_name || ''}`,
+                            tz: pData.timezone || "Unknown Timezone"
+                        };
+                    }
+                } catch (e) { /* Ignore and fallback */ }
+
+                // Try Provider 2: GeoJS (No rate limits, fully free fallback)
+                if (!geoData) {
+                    const fallbackGeo = await fetch(`https://get.geojs.io/v1/ip/geo/${ip}.json`);
+                    const fData = await fallbackGeo.json();
+                    
+                    geoData = {
+                        // Strips the "ASXXXX " part off the front of hosts like Cloudflare to make it clean
+                        isp: fData.organization ? fData.organization.replace(/^AS\d+\s+/, '') : "Unknown ISP",
+                        loc: `${fData.city ? fData.city + ', ' : ''}${fData.country || 'Unknown Region'}`,
+                        tz: fData.timezone || "Unknown Timezone"
+                    };
+                }
+
+                resIsp.innerText = geoData.isp || "Data Unavailable";
+                resLoc.innerText = geoData.loc || "Data Unavailable";
+                resTz.innerText = geoData.tz || "Data Unavailable";
+
+            } catch (e) {
+                resIsp.innerText = "API Blocked (Check Adblocker)";
+                resLoc.innerText = "Failed to fetch";
+                resTz.innerText = "Failed to fetch";
             }
+
         } catch (e) {
-            alert(e.message);
+            // General fallback if the whole process crashes
+            resIp.innerText = "Error";
+            resIsp.innerText = "Error";
+            resLoc.innerText = "Error";
+            resTz.innerText = "Error";
+            alert("WhoDisIP Error: " + e.message);
         }
     }
-</script>
+  </script>
 </body>
 </html>
