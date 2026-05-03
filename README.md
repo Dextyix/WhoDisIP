@@ -5,7 +5,6 @@
 > This is a 100% free, open-source tool. We do not sell "premium support" or corporate services.
 >
 > * **🐛 Bug Reports:** Found a glitch or a broken API? Please open a public [Issue on GitHub](https://github.com/dextyix/WhoDisIP/issues).
-> * **🔐 Security & Tips:** Got a sensitive security flaw or a whistleblower tip for us? Don't post it publicly. Email us securely at [tips@bsreviews.com](mailto:tips@bsreviews.com).
 
 **Maintained by [BS Reviews](https://bsreviews.com)**
 
